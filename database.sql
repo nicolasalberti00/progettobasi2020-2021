@@ -1,8 +1,6 @@
 DROP TABLE IF EXISTS Cliente;
 DROP TABLE IF EXISTS Maestro;
-DROP TABLE IF EXISTS Attivita;
-DROP TABLE IF EXISTS LezSci;
-DROP TABLE IF EXISTS LezSnow;
+DROP TABLE IF EXISTS Lezione;
 DROP TABLE IF EXISTS CartaFedelta;
 DROP TABLE IF EXISTS Sconto;
 DROP TABLE IF EXISTS Noleggio;
@@ -27,36 +25,60 @@ DROP TABLE IF EXISTS VenScarponiSnow;
 DROP TABLE IF EXISTS Fattura;
 DROP TABLE IF EXISTS Scontrino;
 DROP TABLE IF EXISTS Skipass;
-DROP TABLE IF EXISTS Anagrafica;
 
-CREATE TABLE Sconto 
+CREATE TYPE Disciplina AS ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Snowboard');
+
+CREATE TYPE TipoBici AS ENUM ('Elettrica', 'Non elettrica');
+
+CREATE TYPE Lingua AS ENUM ('SI', 'NO');
+
+CREATE TYPE TagliaScarpa AS ENUM ('35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48');
+
+CREATE TYPE TagliaMaglia AS ENUM ('XS', 'S', 'M', 'L', 'XL', 'U');
+
+CREATE TYPE TipoColore AS ENUM ('Blu', 'Verde', 'Rosso', 'Nero', 'Arancione', 'Viola', 'Giallo', 'Rosa', 'Grigio', 'Azzurro', 'Bianco', 'Oro');
+
+CREATE TYPE TipoAbbigliamento AS ENUM ('Giacche', 'Intimo Termico', 'Pantaloni', 'Copricapi', 'Accessori', 'Protezioni', 'Dispositivi di Sicurezza');
+
+CREATE TYPE Persona AS ENUM ('Bambino', 'Adulto');
+
+CREATE TYPE TipoAltro AS ENUM ('Ciaspole', 'Slitte');
+
+CREATE TYPE TipoSkipass AS ENUM ('Ciaspole', 'Slitte');
+
+CREATE TABLE Cliente(
+	Nome VARCHAR (30) NOT NULL,
+	Cognome VARCHAR (30) NOT NULL,
+	CF VARCHAR (16) PRIMARY KEY NOT NULL,
+	Livello VARCHAR(20) NOT NULL,
+	Nazione VARCHAR (30) NOT NULL,
+	DataNascita DATE NOT NULL
+);
+
+CREATE TABLE Vendita
 (
-	NomeSconto VARCHAR (30) NOT NULL,
-	CognomeSconto VARCHAR (30) NOT NULL,
-	PuntiAcc INT NOT NULL,
-	CodiceSconto CHAR(20) PRIMARY KEY NOT NULL,
-	FOREIGN KEY (CodiceSconto) REFERENCES Vendita(Sconto) ON UPDATE CASCADE ON DELETE CASCADE
+	NomeVen VARCHAR (30) NOT NULL,
+	CognomeVen VARCHAR (30) NOT NULL,
+	IDVendita INT PRIMARY KEY NOT NULL,
+	Sconto VARCHAR (20) NOT NULL UNIQUE,
+	PrezzoTotale FLOAT NOT NULL
 );
 
 CREATE TABLE CartaFedelta
 (
 	NomeCarta VARCHAR (30) NOT NULL,
 	CognomeCarta VARCHAR (30) NOT NULL,
-	IDCarta CHAR (20) PRIMARY KEY NOT NULL,
-	DataInizio DATE NOT NULL,
-	FOREIGN KEY (NomeCarta) REFERENCES Sconto(NomeSconto) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (CognomeCarta) REFERENCES Sconto(CognomeSconto) ON UPDATE CASCADE ON DELETE CASCADE
+	IDCarta VARCHAR (20) PRIMARY KEY NOT NULL UNIQUE,
+	DataInizio DATE NOT NULL
 );
 
-CREATE TABLE Cliente(
-	Nome VARCHAR (30) NOT NULL,
-	Cognome VARCHAR (30) NOT NULL,
-	CF CHAR (16) PRIMARY KEY NOT NULL,
-	Livello VARCHAR(20) NOT NULL,
-	Nazione VARCHAR (30) NOT NULL,
-	DataNascita DATE NOT NULL,
-	FOREIGN KEY (Nome) REFERENCES CartaFedelta(NomeCarta) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (Cognome) REFERENCES CartaFedelta(CognomeCarta) ON UPDATE CASCADE ON DELETE CASCADE
+CREATE TABLE Sconto 
+(
+	IDCarta VARCHAR (20) NOT NULL,
+	PuntiAcc INT NOT NULL,
+	CodiceSconto VARCHAR(20) PRIMARY KEY NOT NULL,
+	FOREIGN KEY (CodiceSconto) REFERENCES Vendita(Sconto) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (IDCarta) REFERENCES CartaFedelta(IDCarta)
 );
 
 CREATE TABLE Maestro
@@ -64,58 +86,25 @@ CREATE TABLE Maestro
 	Nome VARCHAR (30) NOT NULL,
 	Cognome VARCHAR (30) NOT NULL,
 	CF CHAR (16) NOT NULL,
-	Tessera INT NOT NULL,
-	Disciplina VARCHAR (20) NOT NULL,
-	LinguaTed ENUM ('SI', 'NO') NOT NULL,
-	LinguaFra ENUM ('SI', 'NO') NOT NULL,
-	PRIMARY KEY (CF, Tessera, Disciplina),
-	FOREIGN KEY (Disciplina) REFERENCES Attivita(Tipologia) ON DELETE NO ACTION,
-	FOREIGN KEY (Nome) REFERENCES Attivita(NomeMaestro) ON DELETE CASCADE,
-	FOREIGN KEY (Cognome) REFERENCES Attivita(CognomeMaestro) ON DELETE CASCADE
+	Tessera VARCHAR (25) NOT NULL,
+	Tipologia Disciplina NOT NULL,
+	LinguaTed Lingua NOT NULL,
+	LinguaFra Lingua NOT NULL,
+	PRIMARY KEY (Tessera)
 );
 
-CREATE TABLE Attivita 
+CREATE TABLE Lezione
 (
-	NomeMaestro VARCHAR (30) NOT NULL,
-	CognomeMaestro VARCHAR (30) NOT NULL,
-	NomeCliente VARCHAR (30) NOT NULL,
-	CognomeCliente VARCHAR (30) NOT NULL,
-	Tipologia VARCHAR (30) NOT NULL,
-	NazioneCliente VARCHAR (30) NOT NULL,
-	PRIMARY KEY (NomeMaestro,CognomeMaestro,NomeCliente,CognomeCliente),
-	FOREIGN KEY (Tipologia) REFERENCES LezSci(TipologiaSci) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (NomeCliente) REFERENCES Cliente(Nome) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (CognomeCliente) REFERENCES Cliente(Cognome) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (NazioneCliente) REFERENCES Cliente(Nazione) ON UPDATE CASCADE ON DELETE CASCADE
+	TesseraMaestro VARCHAR(25) NOT NULL,
+	CodiceCliente VARCHAR (16) NOT NULL,
+	Tipologia Disciplina NOT NULL,
+	TipoCliente Persona NOT NULL,
+	NumOre SMALLINT NOT NULL,
+	DataLez DATE NOT NULL,
+	PRIMARY KEY (TesseraMaestro, CodiceCliente),
+	FOREIGN KEY (CodiceCliente) REFERENCES Cliente(CF) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (TesseraMaestro) REFERENCES Maestro(Tessera) ON UPDATE CASCADE ON DELETE CASCADE
 ); 
-
-CREATE TABLE LezSci
-(
-	NomeMaestro VARCHAR (30) NOT NULL,
-	CognomeMaestro VARCHAR (30) NOT NULL,
-	NomeCliente VARCHAR (30) NOT NULL,
-	CognomeCliente VARCHAR (30) NOT NULL,
-	TipologiaSci VARCHAR (30) NOT NULL,
-	TipoCliente ENUM('Bambini', 'Adulti') NOT NULL,
-	DataLez DATE NOT NULL,
-	NumOre SMALLINT NOT NULL,
-	Prezzo INT NOT NULL,
-	PRIMARY KEY (NomeMaestro,CognomeMaestro,NomeCliente,CognomeCliente)
-);
-
-CREATE TABLE LezSnow
-(
-	NomeMaestro VARCHAR (30) NOT NULL,
-	CognomeMaestro VARCHAR (30) NOT NULL,
-	NomeCliente VARCHAR (30) NOT NULL,
-	CognomeCliente VARCHAR (30) NOT NULL,
-	TipologiaSnow VARCHAR (30) NOT NULL,
-	TipoCliente ENUM('Bambini', 'Adulti') NOT NULL,
-	DataLez DATE NOT NULL,
-	NumOre SMALLINT NOT NULL,
-	Prezzo INT NOT NULL,
-	PRIMARY KEY (NomeMaestro,CognomeMaestro,NomeCliente,CognomeCliente)
-);
 
 CREATE TABLE Noleggio 
 (
@@ -124,25 +113,26 @@ CREATE TABLE Noleggio
 	CartaIdentita VARCHAR (9) PRIMARY KEY NOT NULL,
 	DataInizio DATE NOT NULL,
 	DataFine DATE NOT NULL,
-	IDNoleggio UNSIGNED NOT NULL,
-	PrezzoTotale FLOAT NOT NULL
+	ID INT NOT NULL,
+	PrezzoTotale FLOAT NOT NULL,
+	UNIQUE(ID)
 );
 
 CREATE TABLE NolSci
 (
-	IDSci UNSIGNED PRIMARY KEY NOT NULL,
+	IDSci INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
 	Altezza INT NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
 	Modello VARCHAR (25) NOT NULL,
-	Tipologia ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Telemark') NOT NULL,
+	Tipo Disciplina NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDSci) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE NolSnow
 (
-	IDSnow UNSIGNED PRIMARY KEY NOT NULL,
+	IDSnow INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
 	Altezza INT NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
@@ -154,11 +144,11 @@ CREATE TABLE NolSnow
 
 CREATE TABLE NolBiciclette
 (
-	IDBici UNSIGNED PRIMARY KEY NOT NULL,
+	IDBici INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
-	Misura ENUM('Bambino', 'Adulto') NOT NULL,
+	Misura Persona NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
-	Tipologia ENUM('Elettrica', 'Non Elettrica') NOT NULL,
+	Tipologia TipoBici NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDBici) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -166,9 +156,9 @@ CREATE TABLE NolBiciclette
 
 CREATE TABLE NolPattini
 (
-	IDPattini UNSIGNED PRIMARY KEY NOT NULL,
+	IDPattini INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
-	Taglia ENUM ('35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48') NOT NULL,
+	Taglia TagliaScarpa NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDPattini) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -176,65 +166,183 @@ CREATE TABLE NolPattini
 
 CREATE TABLE NolAltro
 (
-	IDAltro UNSIGNED PRIMARY KEY NOT NULL,
+	IDAltro INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
-	Tipologia ENUM ('Ciaspole', 'Slitte') NOT NULL,
+	Tipologia TipoAltro NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDAltro) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE NolBastoncini
 (
-	IDBast UNSIGNED PRIMARY KEY NOT NULL,
+	IDBast INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
 	Altezza INT NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
 	Modello VARCHAR (25) NOT NULL,
-	Tipologia ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Telemark') NOT NULL,
+	Tipologia Disciplina NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDBast) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE NolScarponiSci
 (
-	IDScarp UNSIGNED PRIMARY KEY NOT NULL,
+	IDScarp INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
-	Taglia ENUM ('35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48') NULL,
+	Taglia TagliaScarpa NULL,
 	Marca VARCHAR (20) NOT NULL,
 	Modello VARCHAR (25) NOT NULL,
-	Tipologia ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Telemark') NOT NULL,
+	Tipologia Disciplina NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDScarp) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE NolScarponiSnow
 (
-	IDScarpSnow UNSIGNED PRIMARY KEY NOT NULL,
+	IDScarpSnow INT PRIMARY KEY NOT NULL,
 	Prezzo FLOAT NOT NULL,
-	Taglia ENUM ('35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48') NOT NULL,
+	Taglia TagliaScarpa NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
 	Modello VARCHAR (25) NOT NULL,
-	Tipologia ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Telemark') NOT NULL,
 	Quantita SMALLINT NOT NULL,
-	FOREIGN KEY (IDScarp) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE TABLE Vendita
-(
-	NomeVen VARCHAR (30),
-	CognomeVen VARCHAR (30),
-	IDVendita UNSIGNED NOT NULL,
-	PrezzoTotale FLOAT NOT NULL
+	FOREIGN KEY (IDScarpSnow) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Fattura
 (
 	PIVA INT NOT NULL,
 	CF VARCHAR (16), 
-	CodUnivoco UNSIGNED NOT NULL,
+	CodUnivoco INT NOT NULL,
 	PEC CHAR (100) NOT NULL,
 	Nome VARCHAR (30) NOT NULL,
-	Cognome VARCHAR (30) NOT NULL
-	
+	Cognome VARCHAR (30) NOT NULL,
+	Via VARCHAR (100) NOT NULL,
+	NumeroCivico INT NOT NULL,
+	Citta VARCHAR (100) NOT NULL,
+	Provincia VARCHAR (2) NOT NULL,
+	CAP INT NOT NULL,
+	Stato VARCHAR (2) NOT NULL DEFAULT 'IT',
+	NumFattura INT PRIMARY KEY NOT NULL,
+	FOREIGN KEY (NumFattura) REFERENCES Vendita(IDVendita)
+);
+
+CREATE TABLE Scontrino
+(
+	IDScontrino INT PRIMARY KEY NOT NULL,
+	DataVen DATE NOT NULL,
+	PrezzoScontrino FLOAT NOT NULL,
+	Articolo VARCHAR (50) NOT NULL,
+	Quantita INT NOT NULL
+);
+
+CREATE TABLE Skipass
+(
+	IDSkipass INT PRIMARY KEY NOT NULL,
+	PrezzoBambini FLOAT NOT NULL,
+	PrezzoAdulti FLOAT NOT NULL,
+	Tipologia TipoSkipass NOT NULL
+);
+
+CREATE TABLE VenSci
+(
+	IDSci INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Altezza INT NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Modello VARCHAR (25) NOT NULL,
+	Tipologia Disciplina NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDSci) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE VenSnow
+(
+	IDSnow INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Altezza INT NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Modello VARCHAR (25) NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDSnow) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE VenBiciclette
+(
+	IDBici INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Misura Persona NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Tipologia TipoBici NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDBici) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE VenPattini
+(
+	IDPattini INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Taglia TagliaScarpa NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDPattini) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE VenAltro
+(
+	IDAltro INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Tipologia TipoAltro NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDAltro) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE VenBastoncini
+(
+	IDBast INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Altezza INT NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Modello VARCHAR (25) NOT NULL,
+	Tipologia Disciplina NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDBast) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE VenScarponiSci
+(
+	IDScarp INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Taglia TagliaScarpa NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Modello VARCHAR (25) NOT NULL,
+	Tipologia Disciplina NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDScarp) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE VenScarponiSnow
+(
+	IDScarpSnow INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Taglia TagliaScarpa NOT NULL,
+	Marca VARCHAR (20) NOT NULL,
+	Modello VARCHAR (50) NOT NULL,
+	Quantita SMALLINT NOT NULL,
+	FOREIGN KEY (IDScarpSnow) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE Abbigliamento
+(
+	IDAbb INT PRIMARY KEY NOT NULL,
+	Prezzo FLOAT NOT NULL,
+	Taglia TagliaScarpa NOT NULL,
+	Colore TipoColore NOT NULL,
+	Modello VARCHAR (50) NOT NULL,
+	Tipologia TipoAbbigliamento NOT NULL,
+	Marca VARCHAR (25) NOT NULL,
+	Quantita INT NOT NULL
 );
