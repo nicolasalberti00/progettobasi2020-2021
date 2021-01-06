@@ -1,41 +1,42 @@
 SET session_replication_role = 'replica';
-DROP TABLE IF EXISTS Lezione;
-DROP TABLE IF EXISTS Cliente;
-DROP TABLE IF EXISTS Maestro;
-DROP TABLE IF EXISTS Sconto;
-DROP TABLE IF EXISTS CartaFedelta;
-DROP TABLE IF EXISTS NolSci;
-DROP TABLE IF EXISTS NolSnow;
-DROP TABLE IF EXISTS NolBiciclette;
-DROP TABLE IF EXISTS NolPattini;
-DROP TABLE IF EXISTS NolAltro;
-DROP TABLE IF EXISTS NolScarponiSci;
-DROP TABLE IF EXISTS NolBastoncini;
-DROP TABLE IF EXISTS NolScarponiSnow;
-DROP TABLE IF EXISTS Noleggio;
-DROP TABLE IF EXISTS VenSci;
-DROP TABLE IF EXISTS VenSnow;
-DROP TABLE IF EXISTS VenBiciclette;
-DROP TABLE IF EXISTS VenPattini;
-DROP TABLE IF EXISTS VenAltro;
-DROP TABLE IF EXISTS VenScarponiSci;
-DROP TABLE IF EXISTS VenBastoncini;
-DROP TABLE IF EXISTS VenScarponiSnow;
-DROP TABLE IF EXISTS Fattura;
-DROP TABLE IF EXISTS Vendita;
-DROP TABLE IF EXISTS Abbigliamento;
-DROP TABLE IF EXISTS Scontrino;
-DROP TABLE IF EXISTS Skipass;
-DROP TYPE IF EXISTS Disciplina;
-DROP TYPE IF EXISTS TipoBici;
-DROP TYPE IF EXISTS Lingua;
-DROP TYPE IF EXISTS TagliaScarpa;
-DROP TYPE IF EXISTS TagliaMaglia;
-DROP TYPE IF EXISTS TipoColore;
-DROP TYPE IF EXISTS TipoAbbigliamento;
-DROP TYPE IF EXISTS Persona;
-DROP TYPE IF EXISTS TipoAltro;
-DROP TYPE IF EXISTS TipoSkipass;
+
+DROP TABLE IF EXISTS Lezione CASCADE; 
+DROP TABLE IF EXISTS Cliente CASCADE;
+DROP TABLE IF EXISTS Maestro CASCADE;
+DROP TABLE IF EXISTS Sconto CASCADE;
+DROP TABLE IF EXISTS CartaFedelta CASCADE;
+DROP TABLE IF EXISTS NolSci CASCADE;
+DROP TABLE IF EXISTS NolSnow CASCADE;
+DROP TABLE IF EXISTS NolBiciclette CASCADE;
+DROP TABLE IF EXISTS NolPattini CASCADE;
+DROP TABLE IF EXISTS NolAltro CASCADE;
+DROP TABLE IF EXISTS NolScarponiSci CASCADE;
+DROP TABLE IF EXISTS NolBastoncini CASCADE;
+DROP TABLE IF EXISTS NolScarponiSnow CASCADE;
+DROP TABLE IF EXISTS Noleggio CASCADE;
+DROP TABLE IF EXISTS VenSci CASCADE;
+DROP TABLE IF EXISTS VenSnow CASCADE;
+DROP TABLE IF EXISTS VenBiciclette CASCADE;
+DROP TABLE IF EXISTS VenPattini CASCADE;
+DROP TABLE IF EXISTS VenAltro CASCADE;
+DROP TABLE IF EXISTS VenScarponiSci CASCADE;
+DROP TABLE IF EXISTS VenBastoncini CASCADE;
+DROP TABLE IF EXISTS VenScarponiSnow CASCADE;
+DROP TABLE IF EXISTS Fattura CASCADE;
+DROP TABLE IF EXISTS Vendita CASCADE;
+DROP TABLE IF EXISTS Abbigliamento CASCADE;
+DROP TABLE IF EXISTS Scontrino CASCADE;
+DROP TABLE IF EXISTS Skipass CASCADE;
+DROP TYPE IF EXISTS Disciplina CASCADE;
+DROP TYPE IF EXISTS TipoBici CASCADE;
+DROP TYPE IF EXISTS Lingua CASCADE;
+DROP TYPE IF EXISTS TagliaScarpa CASCADE;
+DROP TYPE IF EXISTS TagliaMaglia CASCADE;
+DROP TYPE IF EXISTS TipoColore CASCADE;
+DROP TYPE IF EXISTS TipoAbbigliamento CASCADE;
+DROP TYPE IF EXISTS Persona CASCADE;
+DROP TYPE IF EXISTS TipoAltro CASCADE;
+DROP TYPE IF EXISTS TipoSkipass CASCADE;
 
 CREATE TYPE Disciplina AS ENUM ('Alpinismo', 'Discesa', 'Fondo', 'Snowboard', 'Telemark');
 
@@ -136,7 +137,7 @@ CREATE TABLE NolSci
 	Altezza INT NOT NULL,
 	Marca VARCHAR (20) NOT NULL,
 	Modello VARCHAR (25) NOT NULL,
-	Tipo Disciplina NOT NULL,
+	Tipologia Disciplina NOT NULL,
 	Quantita SMALLINT NOT NULL,
 	FOREIGN KEY (IDSci) REFERENCES Noleggio(ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -355,8 +356,8 @@ CREATE TABLE Abbigliamento
 	Modello VARCHAR (50) NOT NULL,
 	Tipologia TipoAbbigliamento NOT NULL,
 	Marca VARCHAR (25) NOT NULL,
-	Quantita INT NOT NULL
-	--FOREIGN KEY (IDAbb) REFERENCES Vendita(IDOggetto) ON UPDATE CASCADE ON DELETE NO ACTION
+	Quantita INT NOT NULL,
+	FOREIGN KEY (IDAbb) REFERENCES Vendita(IDOggetto) ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 INSERT INTO Cliente(Nome, Cognome, DataNascita, CF, Livello, Nazione) VALUES
@@ -482,6 +483,9 @@ INSERT INTO Abbigliamento(Tipologia, Marca, Modello, Colore, Taglia, Prezzo, Qua
 ('Accessori', 'Millet', 'Ubic30L', 'Rosso', 'U', '100', '10', '0411'),
 ('Accessori', 'Cassin', 'Moschettone', 'Giallo', 'U', '8', '15', '0412'),
 ('Accessori', 'Camp', 'Spectrum8,9mm', 'Verde', 'U', '115', '5', '0413'),
+('Accessori', 'Camelbak', 'Chute500ML', 'Arancione', 'U', '15', '10', '0414'),
+('Accessori', 'Casio', 'ProTrek', 'Nero', 'U', '220', '10', '0415'),
+('Accessori', 'Camp', 'SummitSaccoaPelo', 'Rosa', 'U', '190', '10', '0416'),
 ('Protezioni', 'Dainese', 'SoftHex', 'Nero', 'S', '200', '5', '0501'),
 ('Protezioni', 'Dainese', 'SoftHex', 'Nero', 'M', '200', '5', '0502'),
 ('Protezioni', 'Dainese', 'SoftHex', 'Nero', 'L', '200', '5', '0503'),
@@ -582,7 +586,7 @@ INSERT INTO VenSci (Tipologia, Marca, Modello, Altezza, Prezzo, Quantita, IDSci)
 ('Discesa', 'Head', 'WCRebelsGSR', '170', '750', '5', '1219'),
 ('Discesa', 'Head', 'WCRebelsGSR', '175', '750', '5', '1220'),
 ('Discesa', 'Head', 'WCRebelsGSR', '180', '750', '5', '1221'),
-('Discesa', 'Volkl', 'WCRacetigerSL', '115', '600', '10', '1222'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '115', '750', '10', '1222'),
 ('Discesa', 'Volkl', 'WCRacetigerSL', '120', '750', '10', '1223'),
 ('Discesa', 'Volkl', 'WCRacetigerSL', '125', '750', '10', '1224'),
 ('Discesa', 'Volkl', 'WCRacetigerSL', '130', '750', '10', '1225'),
@@ -622,5 +626,404 @@ INSERT INTO VenSci (Tipologia, Marca, Modello, Altezza, Prezzo, Quantita, IDSci)
 ('Telemark', 'BlackCrows', 'Mantra', '180', '600', '5', '1259'),
 ('Telemark', 'BlackCrows', 'Mantra', '185', '600', '5', '1260'),
 ('Telemark', 'BlackCrows', 'Mantra', '190', '600', '5', '1261');
+
+INSERT INTO VenSnow(Marca, Modello, Altezza, Prezzo, Quantita, IDSnow) VALUES
+('Burton', 'Amplifier', '150', '380', '5', '1301'),
+('Burton', 'Amplifier', '155', '380', '5', '1302'),
+('Burton', 'Amplifier', '160', '380', '5', '1303'),
+('Burton', 'Amplifier', '165', '380', '5', '1304'),
+('Burton', 'Amplifier', '170', '380', '5', '1305'),
+('Burton', 'Amplifier', '175', '380', '5', '1306'),
+('Burton', 'Amplifier', '180', '380', '5', '1307'),
+('Nitro', 'PrimeToxic', '150', '280', '5', '1308'),
+('Nitro', 'PrimeToxic', '155', '380', '5', '1309'),
+('Nitro', 'PrimeToxic', '160', '380', '5', '1310'),
+('Nitro', 'PrimeToxic', '165', '380', '5', '1311'),
+('Nitro', 'PrimeToxic', '170', '380', '5', '1312'),
+('Nitro', 'PrimeToxic', '175', '380', '5', '1313'),
+('Nitro', 'PrimeToxic', '180', '380', '5', '1314');
+
+INSERT INTO VenScarponiSci (Tipologia, Marca, Modello, Taglia, Prezzo, Quantita, IDScarp) VALUES
+('Alpinismo', 'Scarpa', 'Maestrale', '36', '450', '2', '1401'),
+('Alpinismo', 'Scarpa', 'Maestrale', '37', '450', '2', '1402'),
+('Alpinismo', 'Scarpa', 'Maestrale', '38', '450', '2', '1403'),
+('Alpinismo', 'Scarpa', 'Maestrale', '39', '450', '2', '1404'),
+('Alpinismo', 'Scarpa', 'Maestrale', '40', '450', '2', '1405'),
+('Alpinismo', 'Scarpa', 'Maestrale', '41', '450', '2', '1406'),
+('Alpinismo', 'Scarpa', 'Maestrale', '42', '450', '2', '1407'),
+('Alpinismo', 'Scarpa', 'Maestrale', '43', '450', '2', '1408'),
+('Alpinismo', 'Scarpa', 'Maestrale', '44', '450', '2', '1409'),
+('Alpinismo', 'Scarpa', 'Maestrale', '45', '450', '2', '1410'),
+('Alpinismo', 'Scarpa', 'Maestrale', '46', '450', '2', '1411'),
+('Alpinismo', 'Scarpa', 'Maestrale', '47', '450', '2', '1412'),
+('Alpinismo', 'Scarpa', 'Maestrale', '48', '450', '2', '1413'),
+('Discesa', 'Head', 'Raptor', '36', '300', '2', '1414'),
+('Discesa', 'Head', 'Raptor', '37', '300', '2', '1415'),
+('Discesa', 'Head', 'Raptor', '38', '300', '2', '1416'),
+('Discesa', 'Head', 'Raptor', '39', '300', '2', '1417'),
+('Discesa', 'Head', 'Raptor', '40', '300', '2', '1418'),
+('Discesa', 'Head', 'Raptor', '41', '300', '2', '1419'),
+('Discesa', 'Head', 'Raptor', '42', '300', '2', '1420'),
+('Discesa', 'Head', 'Raptor', '43', '300', '2', '1421'),
+('Discesa', 'Head', 'Raptor', '44', '300', '2', '1422'),
+('Discesa', 'Head', 'Raptor', '45', '300', '2', '1423'),
+('Discesa', 'Head', 'Raptor', '46', '300', '2', '1424'),
+('Discesa', 'Head', 'Raptor', '47', '300', '2', '1425'),
+('Discesa', 'Head', 'Raptor', '48', '300', '2', '1426'),
+('Discesa', 'Lange', 'WorldCup', '36', '480', '2', '1427'),
+('Discesa', 'Lange', 'WorldCup', '37', '480', '2', '1428'),
+('Discesa', 'Lange', 'WorldCup', '38', '480', '2', '1429'),
+('Discesa', 'Lange', 'WorldCup', '39', '480', '2', '1430'),
+('Discesa', 'Lange', 'WorldCup', '40', '480', '2', '1431'),
+('Discesa', 'Lange', 'WorldCup', '41', '480', '2', '1432'),
+('Discesa', 'Lange', 'WorldCup', '42', '480', '2', '1433'),
+('Discesa', 'Lange', 'WorldCup', '43', '480', '2', '1434'),
+('Discesa', 'Lange', 'WorldCup', '44', '480', '2', '1435'),
+('Discesa', 'Lange', 'WorldCup', '45', '480', '2', '1436'),
+('Discesa', 'Lange', 'WorldCup', '46', '480', '2', '1437'),
+('Discesa', 'Lange', 'WorldCup', '47', '480', '2', '1438'),
+('Discesa', 'Lange', 'WorldCup', '48', '480', '2', '1439'),
+('Discesa', 'DalBello', 'DRS', '36', '450', '2', '1440'),
+('Discesa', 'DalBello', 'DRS', '37', '450', '2', '1441'),
+('Discesa', 'DalBello', 'DRS', '38', '450', '2', '1442'),
+('Discesa', 'DalBello', 'DRS', '39', '450', '2', '1443'),
+('Discesa', 'DalBello', 'DRS', '40', '450', '2', '1444'),
+('Discesa', 'DalBello', 'DRS', '41', '450', '2', '1445'),
+('Discesa', 'DalBello', 'DRS', '42', '450', '2', '1446'),
+('Discesa', 'DalBello', 'DRS', '43', '450', '2', '1447'),
+('Discesa', 'DalBello', 'DRS', '44', '450', '2', '1448'),
+('Discesa', 'DalBello', 'DRS', '45', '450', '2', '1449'),
+('Discesa', 'DalBello', 'DRS', '46', '450', '2', '1450'),
+('Discesa', 'DalBello', 'DRS', '47', '450', '2', '1451'),
+('Discesa', 'DalBello', 'DRS', '48', '450', '2', '1452'),
+('Fondo', 'Fischer', 'Carbonlite', '36', '230', '2', '1453'),
+('Fondo', 'Fischer', 'Carbonlite', '37', '230', '2', '1454'),
+('Fondo', 'Fischer', 'Carbonlite', '38', '230', '2', '1455'),
+('Fondo', 'Fischer', 'Carbonlite', '39', '230', '2', '1456'),
+('Fondo', 'Fischer', 'Carbonlite', '40', '230', '2', '1457'),
+('Fondo', 'Fischer', 'Carbonlite', '41', '230', '2', '1458'),
+('Fondo', 'Fischer', 'Carbonlite', '42', '230', '2', '1459'),
+('Fondo', 'Fischer', 'Carbonlite', '43', '230', '2', '1460'),
+('Fondo', 'Fischer', 'Carbonlite', '44', '230', '2', '1461'),
+('Fondo', 'Fischer', 'Carbonlite', '45', '230', '2', '1462'),
+('Fondo', 'Fischer', 'Carbonlite', '46', '230', '2', '1463'),
+('Fondo', 'Fischer', 'Carbonlite', '47', '230', '2', '1464'),
+('Fondo', 'Fischer', 'Carbonlite', '48', '230', '2', '1465'),
+('Fondo', 'Rossignol', 'X-Ium', '36', '400', '2', '1466'),
+('Fondo', 'Rossignol', 'X-Ium', '37', '400', '2', '1467'),
+('Fondo', 'Rossignol', 'X-Ium', '38', '400', '2', '1468'),
+('Fondo', 'Rossignol', 'X-Ium', '39', '400', '2', '1469'),
+('Fondo', 'Rossignol', 'X-Ium', '40', '400', '2', '1470'),
+('Fondo', 'Rossignol', 'X-Ium', '41', '400', '2', '1471'),
+('Fondo', 'Rossignol', 'X-Ium', '42', '400', '2', '1472'),
+('Fondo', 'Rossignol', 'X-Ium', '43', '400', '2', '1473'),
+('Fondo', 'Rossignol', 'X-Ium', '44', '400', '2', '1474'),
+('Fondo', 'Rossignol', 'X-Ium', '45', '400', '2', '1475'),
+('Fondo', 'Rossignol', 'X-Ium', '46', '400', '2', '1476'),
+('Fondo', 'Rossignol', 'X-Ium', '47', '400', '2', '1477'),
+('Fondo', 'Rossignol', 'X-Ium', '48', '400', '2', '1478'),
+('Fondo', 'Rossignol', 'X-Ium', '48', '400', '2', '1479'),
+('Telemark', 'Scarpa', 'TXPro', '36', '470', '2', '1480'),
+('Telemark', 'Scarpa', 'TXPro', '37', '470', '2', '1481'),
+('Telemark', 'Scarpa', 'TXPro', '38', '470', '2', '1482'),
+('Telemark', 'Scarpa', 'TXPro', '39', '470', '2', '1483'),
+('Telemark', 'Scarpa', 'TXPro', '40', '470', '2', '1484'),
+('Telemark', 'Scarpa', 'TXPro', '41', '470', '2', '1485'),
+('Telemark', 'Scarpa', 'TXPro', '42', '470', '2', '1486'),
+('Telemark', 'Scarpa', 'TXPro', '43', '470', '2', '1487'),
+('Telemark', 'Scarpa', 'TXPro', '44', '470', '2', '1488'),
+('Telemark', 'Scarpa', 'TXPro', '45', '470', '2', '1489'),
+('Telemark', 'Scarpa', 'TXPro', '46', '470', '2', '1490'),
+('Telemark', 'Scarpa', 'TXPro', '47', '470', '2', '1491'),
+('Telemark', 'Scarpa', 'TXPro', '48', '470', '2', '1492');
+
+INSERT INTO VenScarponiSnow (Marca, Modello, Taglia, Prezzo, Quantita, IDScarpSnow) VALUES
+('Burton', 'MotoBoa', '36', '200', '2', '1501'),
+('Burton', 'MotoBoa', '37', '200', '2', '1502'),
+('Burton', 'MotoBoa', '38', '200', '2', '1503'),
+('Burton', 'MotoBoa', '39', '200', '2', '1504'),
+('Burton', 'MotoBoa', '40', '200', '2', '1505'),
+('Burton', 'MotoBoa', '41', '200', '2', '1506'),
+('Burton', 'MotoBoa', '42', '200', '2', '1507'),
+('Burton', 'MotoBoa', '43', '200', '2', '1508'),
+('Burton', 'MotoBoa', '44', '200', '2', '1509'),
+('Burton', 'MotoBoa', '45', '200', '2', '1510'),
+('Burton', 'MotoBoa', '46', '200', '2', '1511'),
+('Burton', 'MotoBoa', '47', '200', '2', '1512'),
+('Burton', 'MotoBoa', '48', '200', '2', '1513'),
+('Nitro', 'Vagabond', '36', '150', '2', '1514'),
+('Nitro', 'Vagabond', '37', '150', '2', '1515'),
+('Nitro', 'Vagabond', '38', '150', '2', '1516'),
+('Nitro', 'Vagabond', '39', '150', '2', '1517'),
+('Nitro', 'Vagabond', '40', '150', '2', '1518'),
+('Nitro', 'Vagabond', '41', '150', '2', '1519'),
+('Nitro', 'Vagabond', '42', '150', '2', '1520'),
+('Nitro', 'Vagabond', '43', '150', '2', '1521'),
+('Nitro', 'Vagabond', '44', '150', '2', '1522'),
+('Nitro', 'Vagabond', '45', '150', '2', '1523'),
+('Nitro', 'Vagabond', '46', '150', '2', '1524'),
+('Nitro', 'Vagabond', '47', '150', '2', '1525'),
+('Nitro', 'Vagabond', '48', '150', '2', '1526');
+
+INSERT INTO NolAltro (Tipologia, Marca, Prezzo, Quantita, IDAltro) VALUES
+('Ciaspole', 'TSL', '100', '5', '0701'),
+('Ciaspole', 'Alpidex', '80', '10', '0702'),
+('Slitte', 'Biemme', '50', '10', '0801');
+
+INSERT INTO NolBiciclette (Tipologia, Misura, Marca, Prezzo, Quantita, IDBici) VALUES
+('Non elettrica', 'Adulto', 'Specialized', '120', '5', '0901'),
+('Non elettrica', 'Bambino', 'Specialized', '80', '5', '0902'),
+('Non elettrica', 'Adulto', 'Scott', '120', '5', '0903'),
+('Elettrica', 'Adulto', 'Bianchi', '220', '3', '0904'),
+('Elettrica', 'Adulto', 'FatBike', '220', '3', '0905');
+
+INSERT INTO NolPattini (Taglia, Prezzo, Quantita, IDPattini) VALUES
+('35', '30', '2', '1001'),
+('36', '30', '2', '1002'),
+('37', '30', '2', '1003'),
+('38', '30', '2', '1004'),
+('39', '30', '2', '1005'),
+('40', '30', '2', '1006'),
+('41', '30', '2', '1007'),
+('42', '30', '2', '1008'),
+('43', '30', '2', '1009'),
+('44', '30', '2', '1010'),
+('45', '30', '2', '1011'),
+('46', '30', '2', '1012'),
+('47', '30', '2', '1013'),
+('48', '30', '2', '1014');
+
+INSERT INTO NolBastoncini (Tipologia, Marca, Modello, Altezza, Prezzo, Quantita, IDBast) VALUES
+('Alpinismo', 'SkiTrab', 'Teleskopik', 'U', '15', '10', '1101'),
+('Discesa', 'Atomic', 'WCSL', '100', '10', '10', '1102'),
+('Discesa', 'Atomic', 'WCSL', '105', '10', '10', '1103'),
+('Discesa', 'Atomic', 'WCSL', '110', '10', '10', '1104'),
+('Discesa', 'Atomic', 'WCSL', '115', '10', '10', '1105'),
+('Discesa', 'Atomic', 'WCSL', '120', '10', '10', '1106'),
+('Discesa', 'Atomic', 'WCSL', '125', '10', '10', '1107'),
+('Discesa', 'Atomic', 'WCSL', '130', '10', '10', '1108'),
+('Discesa', 'Leki', 'WCGS', '100', '10', '10', '1109'),
+('Discesa', 'Leki', 'WCGS', '105', '10', '10', '1110'),
+('Discesa', 'Leki', 'WCGS', '110', '10', '10', '1111'),
+('Discesa', 'Leki', 'WCGS', '115', '10', '10', '1112'),
+('Discesa', 'Leki', 'WCGS', '120', '10', '10', '1113'),
+('Discesa', 'Leki', 'WCGS', '125', '10', '10', '1114'),
+('Discesa', 'Leki', 'WCGS', '130', '10', '10', '1115'),
+('Fondo', 'Rossignol', 'Thunder', '100', '10', '10', '1116'),
+('Fondo', 'Rossignol', 'Thunder', '105', '10', '10', '1117'),
+('Fondo', 'Rossignol', 'Thunder', '110', '10', '10', '1118'),
+('Fondo', 'Rossignol', 'Thunder', '115', '10', '10', '1119'),
+('Fondo', 'Rossignol', 'Thunder', '120', '10', '10', '1120'),
+('Fondo', 'Rossignol', 'Thunder', '125', '10', '10', '1121'),
+('Fondo', 'Rossignol', 'Thunder', '130', '10', '10', '1122'),
+('Fondo', 'Fischer', 'SpeedMax', '100', '10', '8', '1123'),
+('Fondo', 'Fischer', 'SpeedMax', '105', '10', '8', '1124'),
+('Fondo', 'Fischer', 'SpeedMax', '110', '10', '8', '1125'),
+('Fondo', 'Fischer', 'SpeedMax', '115', '10', '8', '1126'),
+('Fondo', 'Fischer', 'SpeedMax', '120', '10', '8', '1127'),
+('Fondo', 'Fischer', 'SpeedMax', '125', '10', '8', '1128'),
+('Fondo', 'Fischer', 'SpeedMax', '130', '10', '8', '1129'),
+('Telemark', 'BlackCrows', 'Telescopicus', 'U', '15', '10', '1130');
+
+INSERT INTO NolSci (Tipologia, Marca, Modello, Altezza, Prezzo, Quantita, IDSci) VALUES
+('Alpinismo', 'SkiTrab', 'Powercup', '150', '150', '5', '1201'),
+('Alpinismo', 'SkiTrab', 'Powercup', '155', '150', '5', '1202'),
+('Alpinismo', 'SkiTrab', 'Powercup', '160', '150', '5', '1203'),
+('Alpinismo', 'SkiTrab', 'Powercup', '165', '150', '5', '1204'),
+('Alpinismo', 'SkiTrab', 'Powercup', '170', '150', '5', '1205'),
+('Alpinismo', 'SkiTrab', 'Powercup', '175', '150', '5', '1206'),
+('Alpinismo', 'SkiTrab', 'Powercup', '180', '150', '5', '1207'),
+('Discesa', 'Atomic', 'RedsterGS', '150', '160', '5', '1208'),
+('Discesa', 'Atomic', 'RedsterGS', '155', '160', '5', '1209'),
+('Discesa', 'Atomic', 'RedsterGS', '160', '160', '5', '1210'),
+('Discesa', 'Atomic', 'RedsterGS', '165', '160', '5', '1211'),
+('Discesa', 'Atomic', 'RedsterGS', '170', '160', '5', '1212'),
+('Discesa', 'Atomic', 'RedsterGS', '175', '160', '5', '1213'),
+('Discesa', 'Atomic', 'RedsterGS', '180', '160', '5', '1214'),
+('Discesa', 'Head', 'WCRebelsGSR', '150', '160', '5', '1215'),
+('Discesa', 'Head', 'WCRebelsGSR', '155', '160', '5', '1216'),
+('Discesa', 'Head', 'WCRebelsGSR', '160', '160', '5', '1217'),
+('Discesa', 'Head', 'WCRebelsGSR', '165', '160', '5', '1218'),
+('Discesa', 'Head', 'WCRebelsGSR', '170', '160', '5', '1219'),
+('Discesa', 'Head', 'WCRebelsGSR', '175', '160', '5', '1220'),
+('Discesa', 'Head', 'WCRebelsGSR', '180', '160', '5', '1221'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '115', '160', '10', '1222'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '120', '160', '10', '1223'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '125', '160', '10', '1224'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '130', '160', '10', '1225'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '135', '160', '10', '1226'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '140', '160', '10', '1227'),
+('Discesa', 'Volkl', 'WCRacetigerSL', '145', '160', '10', '1228'),
+('Fondo', 'Rossignol', 'X-IumSkate', '150', '130', '5', '1229'),
+('Fondo', 'Rossignol', 'X-IumSkate', '155', '130', '5', '1230'),
+('Fondo', 'Rossignol', 'X-IumSkate', '160', '130', '5', '1231'),
+('Fondo', 'Rossignol', 'X-IumSkate', '165', '130', '5', '1232'),
+('Fondo', 'Rossignol', 'X-IumSkate', '170', '130', '5', '1233'),
+('Fondo', 'Rossignol', 'X-IumSkate', '175', '130', '5', '1234'),
+('Fondo', 'Rossignol', 'X-IumSkate', '180', '130', '5', '1235'),
+('Fondo', 'Rossignol', 'X-IumSkate', '185', '130', '5', '1236'),
+('Fondo', 'Rossignol', 'X-IumSkate', '190', '130', '5', '1237'),
+('Fondo', 'Rossignol', 'X-IumSkate', '195', '130', '5', '1238'),
+('Fondo', 'Rossignol', 'X-IumSkate', '200', '130', '5', '1239'),
+('Fondo', 'Rossignol', 'X-IumSkate', '205', '130', '5', '1240'),
+('Fondo', 'Rossignol', 'X-IumSkate', '210', '130', '5', '1241'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '150', '130', '5', '1242'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '155', '130', '5', '1243'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '160', '130', '5', '1244'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '165', '130', '5', '1245'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '170', '130', '5', '1246'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '175', '130', '5', '1247'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '180', '130', '5', '1248'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '185', '130', '5', '1249'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '190', '130', '5', '1250'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '195', '130', '5', '1251'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '200', '130', '5', '1252'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '205', '130', '5', '1253'),
+('Fondo', 'Fischer', 'CarbonliteGrip', '210', '130', '5', '1254'),
+('Telemark', 'BlackCrows', 'Mantra', '160', '130', '5', '1255'),
+('Telemark', 'BlackCrows', 'Mantra', '165', '130', '5', '1256'),
+('Telemark', 'BlackCrows', 'Mantra', '170', '130', '5', '1257'),
+('Telemark', 'BlackCrows', 'Mantra', '175', '130', '5', '1258'),
+('Telemark', 'BlackCrows', 'Mantra', '180', '130', '5', '1259'),
+('Telemark', 'BlackCrows', 'Mantra', '185', '130', '5', '1260'),
+('Telemark', 'BlackCrows', 'Mantra', '190', '130', '5', '1261');
+
+INSERT INTO NolSnow(Marca, Modello, Altezza, Prezzo, Quantita, IDSnow) VALUES
+('Burton', 'Amplifier', '150', '120', '5', '1301'),
+('Burton', 'Amplifier', '155', '120', '5', '1302'),
+('Burton', 'Amplifier', '160', '120', '5', '1303'),
+('Burton', 'Amplifier', '165', '120', '5', '1304'),
+('Burton', 'Amplifier', '170', '120', '5', '1305'),
+('Burton', 'Amplifier', '175', '120', '5', '1306'),
+('Burton', 'Amplifier', '180', '120', '5', '1307'),
+('Nitro', 'PrimeToxic', '150', '120', '5', '1308'),
+('Nitro', 'PrimeToxic', '155', '120', '5', '1309'),
+('Nitro', 'PrimeToxic', '160', '120', '5', '1310'),
+('Nitro', 'PrimeToxic', '165', '120', '5', '1311'),
+('Nitro', 'PrimeToxic', '170', '120', '5', '1312'),
+('Nitro', 'PrimeToxic', '175', '120', '5', '1313'),
+('Nitro', 'PrimeToxic', '180', '120', '5', '1314');
+
+INSERT INTO NolScarponiSci (Tipologia, Marca, Modello, Taglia, Prezzo, Quantita, IDScarp) VALUES
+('Alpinismo', 'Scarpa', 'Maestrale', '36', '70', '2', '1401'),
+('Alpinismo', 'Scarpa', 'Maestrale', '37', '70', '2', '1402'),
+('Alpinismo', 'Scarpa', 'Maestrale', '38', '70', '2', '1403'),
+('Alpinismo', 'Scarpa', 'Maestrale', '39', '70', '2', '1404'),
+('Alpinismo', 'Scarpa', 'Maestrale', '40', '70', '2', '1405'),
+('Alpinismo', 'Scarpa', 'Maestrale', '41', '70', '2', '1406'),
+('Alpinismo', 'Scarpa', 'Maestrale', '42', '70', '2', '1407'),
+('Alpinismo', 'Scarpa', 'Maestrale', '43', '70', '2', '1408'),
+('Alpinismo', 'Scarpa', 'Maestrale', '44', '70', '2', '1409'),
+('Alpinismo', 'Scarpa', 'Maestrale', '45', '70', '2', '1410'),
+('Alpinismo', 'Scarpa', 'Maestrale', '46', '70', '2', '1411'),
+('Alpinismo', 'Scarpa', 'Maestrale', '47', '70', '2', '1412'),
+('Alpinismo', 'Scarpa', 'Maestrale', '48', '70', '2', '1413'),
+('Discesa', 'Head', 'Raptor', '36', '80', '2', '1414'),
+('Discesa', 'Head', 'Raptor', '37', '80', '2', '1415'),
+('Discesa', 'Head', 'Raptor', '38', '80', '2', '1416'),
+('Discesa', 'Head', 'Raptor', '39', '80', '2', '1417'),
+('Discesa', 'Head', 'Raptor', '40', '80', '2', '1418'),
+('Discesa', 'Head', 'Raptor', '41', '80', '2', '1419'),
+('Discesa', 'Head', 'Raptor', '42', '80', '2', '1420'),
+('Discesa', 'Head', 'Raptor', '43', '80', '2', '1421'),
+('Discesa', 'Head', 'Raptor', '44', '80', '2', '1422'),
+('Discesa', 'Head', 'Raptor', '45', '80', '2', '1423'),
+('Discesa', 'Head', 'Raptor', '46', '80', '2', '1424'),
+('Discesa', 'Head', 'Raptor', '47', '80', '2', '1425'),
+('Discesa', 'Head', 'Raptor', '48', '80', '2', '1426'),
+('Discesa', 'Lange', 'WorldCup', '36', '80', '2', '1427'),
+('Discesa', 'Lange', 'WorldCup', '37', '80', '2', '1428'),
+('Discesa', 'Lange', 'WorldCup', '38', '80', '2', '1429'),
+('Discesa', 'Lange', 'WorldCup', '39', '80', '2', '1430'),
+('Discesa', 'Lange', 'WorldCup', '40', '80', '2', '1431'),
+('Discesa', 'Lange', 'WorldCup', '41', '80', '2', '1432'),
+('Discesa', 'Lange', 'WorldCup', '42', '80', '2', '1433'),
+('Discesa', 'Lange', 'WorldCup', '43', '80', '2', '1434'),
+('Discesa', 'Lange', 'WorldCup', '44', '80', '2', '1435'),
+('Discesa', 'Lange', 'WorldCup', '45', '80', '2', '1436'),
+('Discesa', 'Lange', 'WorldCup', '46', '80', '2', '1437'),
+('Discesa', 'Lange', 'WorldCup', '47', '80', '2', '1438'),
+('Discesa', 'Lange', 'WorldCup', '48', '80', '2', '1439'),
+('Discesa', 'DalBello', 'DRS', '36', '80', '2', '1440'),
+('Discesa', 'DalBello', 'DRS', '37', '80', '2', '1441'),
+('Discesa', 'DalBello', 'DRS', '38', '80', '2', '1442'),
+('Discesa', 'DalBello', 'DRS', '39', '80', '2', '1443'),
+('Discesa', 'DalBello', 'DRS', '40', '80', '2', '1444'),
+('Discesa', 'DalBello', 'DRS', '41', '80', '2', '1445'),
+('Discesa', 'DalBello', 'DRS', '42', '80', '2', '1446'),
+('Discesa', 'DalBello', 'DRS', '43', '80', '2', '1447'),
+('Discesa', 'DalBello', 'DRS', '44', '80', '2', '1448'),
+('Discesa', 'DalBello', 'DRS', '45', '80', '2', '1449'),
+('Discesa', 'DalBello', 'DRS', '46', '80', '2', '1450'),
+('Discesa', 'DalBello', 'DRS', '47', '80', '2', '1451'),
+('Discesa', 'DalBello', 'DRS', '48', '80', '2', '1452'),
+('Fondo', 'Fischer', 'Carbonlite', '36', '50', '2', '1453'),
+('Fondo', 'Fischer', 'Carbonlite', '37', '50', '2', '1454'),
+('Fondo', 'Fischer', 'Carbonlite', '38', '50', '2', '1455'),
+('Fondo', 'Fischer', 'Carbonlite', '39', '50', '2', '1456'),
+('Fondo', 'Fischer', 'Carbonlite', '40', '50', '2', '1457'),
+('Fondo', 'Fischer', 'Carbonlite', '41', '50', '2', '1458'),
+('Fondo', 'Fischer', 'Carbonlite', '42', '50', '2', '1459'),
+('Fondo', 'Fischer', 'Carbonlite', '43', '50', '2', '1460'),
+('Fondo', 'Fischer', 'Carbonlite', '44', '50', '2', '1461'),
+('Fondo', 'Fischer', 'Carbonlite', '45', '50', '2', '1462'),
+('Fondo', 'Fischer', 'Carbonlite', '46', '50', '2', '1463'),
+('Fondo', 'Fischer', 'Carbonlite', '47', '50', '2', '1464'),
+('Fondo', 'Fischer', 'Carbonlite', '48', '50', '2', '1465'),
+('Fondo', 'Rossignol', 'X-Ium', '36', '50', '2', '1466'),
+('Fondo', 'Rossignol', 'X-Ium', '37', '50', '2', '1467'),
+('Fondo', 'Rossignol', 'X-Ium', '38', '50', '2', '1468'),
+('Fondo', 'Rossignol', 'X-Ium', '39', '50', '2', '1469'),
+('Fondo', 'Rossignol', 'X-Ium', '40', '50', '2', '1470'),
+('Fondo', 'Rossignol', 'X-Ium', '41', '50', '2', '1471'),
+('Fondo', 'Rossignol', 'X-Ium', '42', '50', '2', '1472'),
+('Fondo', 'Rossignol', 'X-Ium', '43', '50', '2', '1473'),
+('Fondo', 'Rossignol', 'X-Ium', '44', '50', '2', '1474'),
+('Fondo', 'Rossignol', 'X-Ium', '45', '50', '2', '1475'),
+('Fondo', 'Rossignol', 'X-Ium', '46', '50', '2', '1476'),
+('Fondo', 'Rossignol', 'X-Ium', '47', '50', '2', '1477'),
+('Fondo', 'Rossignol', 'X-Ium', '48', '50', '2', '1478'),
+('Fondo', 'Rossignol', 'X-Ium', '48', '50', '2', '1479'),
+('Telemark', 'Scarpa', 'TXPro', '36', '50', '2', '1480'),
+('Telemark', 'Scarpa', 'TXPro', '37', '50', '2', '1481'),
+('Telemark', 'Scarpa', 'TXPro', '38', '50', '2', '1482'),
+('Telemark', 'Scarpa', 'TXPro', '39', '50', '2', '1483'),
+('Telemark', 'Scarpa', 'TXPro', '40', '50', '2', '1484'),
+('Telemark', 'Scarpa', 'TXPro', '41', '50', '2', '1485'),
+('Telemark', 'Scarpa', 'TXPro', '42', '50', '2', '1486'),
+('Telemark', 'Scarpa', 'TXPro', '43', '50', '2', '1487'),
+('Telemark', 'Scarpa', 'TXPro', '44', '50', '2', '1488'),
+('Telemark', 'Scarpa', 'TXPro', '45', '50', '2', '1489'),
+('Telemark', 'Scarpa', 'TXPro', '46', '50', '2', '1490'),
+('Telemark', 'Scarpa', 'TXPro', '47', '50', '2', '1491'),
+('Telemark', 'Scarpa', 'TXPro', '48', '50', '2', '1492');
+
+INSERT INTO NolScarponiSnow (Marca, Modello, Taglia, Prezzo, Quantita, IDScarpSnow) VALUES
+('Burton', 'MotoBoa', '36', '40', '2', '1501'),
+('Burton', 'MotoBoa', '37', '40', '2', '1502'),
+('Burton', 'MotoBoa', '38', '40', '2', '1503'),
+('Burton', 'MotoBoa', '39', '40', '2', '1504'),
+('Burton', 'MotoBoa', '40', '40', '2', '1505'),
+('Burton', 'MotoBoa', '41', '40', '2', '1506'),
+('Burton', 'MotoBoa', '42', '40', '2', '1507'),
+('Burton', 'MotoBoa', '43', '40', '2', '1508'),
+('Burton', 'MotoBoa', '44', '40', '2', '1509'),
+('Burton', 'MotoBoa', '45', '40', '2', '1510'),
+('Burton', 'MotoBoa', '46', '40', '2', '1511'),
+('Burton', 'MotoBoa', '47', '40', '2', '1512'),
+('Burton', 'MotoBoa', '48', '40', '2', '1513'),
+('Nitro', 'Vagabond', '36', '40', '2', '1514'),
+('Nitro', 'Vagabond', '37', '40', '2', '1515'),
+('Nitro', 'Vagabond', '38', '40', '2', '1516'),
+('Nitro', 'Vagabond', '39', '40', '2', '1517'),
+('Nitro', 'Vagabond', '40', '40', '2', '1518'),
+('Nitro', 'Vagabond', '41', '40', '2', '1519'),
+('Nitro', 'Vagabond', '42', '40', '2', '1520'),
+('Nitro', 'Vagabond', '43', '40', '2', '1521'),
+('Nitro', 'Vagabond', '44', '40', '2', '1522'),
+('Nitro', 'Vagabond', '45', '40', '2', '1523'),
+('Nitro', 'Vagabond', '46', '40', '2', '1524'),
+('Nitro', 'Vagabond', '47', '40', '2', '1525'),
+('Nitro', 'Vagabond', '48', '40', '2', '1526');
 
 SET session_replication_role = 'origin';
