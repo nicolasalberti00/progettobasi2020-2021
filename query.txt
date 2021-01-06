@@ -1,0 +1,44 @@
+SELECT cliente.CF
+FROM cliente, noleggio
+WHERE noleggio.nomenol=cliente.nome and noleggio.cognomenol=cliente.cognome and noleggio.datafine<'2021/01/06'
+
+__________________________________
+
+SELECT cliente.nome
+FROM lezione, cliente
+WHERE cliente.CF=lezione.codicecliente and lezione.tipocliente='Bambino'
+
+__________________________________
+
+SELECT COUNT(cliente) as numeropersone
+FROM lezione, cliente
+WHERE cliente.CF=lezione.codicecliente and lezione.numore='8'
+
+__________________________________
+
+SELECT vendita.sconto as sconto, vendita.idvendita as vendita
+FROM vendita, scontrino
+WHERE vendita.idvendita=scontrino.idscontrino and scontrino.dataven='2020-25-12'
+
+__________________________________
+
+SELECT DISTINCT nolsci.modello as sci, nolscarponisci.modello as scarponi, nolbastoncini.modello as bastoncini 
+FROM nolsci, nolscarponisci, nolbastoncini
+WHERE nolsci.altezza='170' and nolscarponisci.taglia='37' and nolbastoncini.altezza='130'
+
+___________________________________
+
+DROP VIEW IF EXISTS ordini_abbigliamento;
+
+create view ordini_abbigliamento as
+SELECT abbigliamento.taglia
+FROM abbigliamento
+WHERE abbigliamento.quantita<'7'
+group by abbigliamento.taglia;
+
+SELECT abbigliamento.modello, ordini_abbigliamento as taglie
+FROM ordini_abbigliamento, abbigliamento
+EXCEPT( 
+SELECT abbigliamento.modello, ordini_abbigliamento
+from abbigliamento, ordini_abbigliamento
+where abbigliamento.quantita>'8');
