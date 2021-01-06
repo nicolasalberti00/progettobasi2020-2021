@@ -1,5 +1,5 @@
 SET session_replication_role = 'replica';
-
+DROP INDEX IF EXISTS idx_tipo_abbigliamento;
 DROP TABLE IF EXISTS Lezione CASCADE; 
 DROP TABLE IF EXISTS Cliente CASCADE;
 DROP TABLE IF EXISTS Maestro CASCADE;
@@ -56,7 +56,7 @@ CREATE TYPE Persona AS ENUM ('Bambino', 'Adulto');
 
 CREATE TYPE TipoAltro AS ENUM ('Ciaspole', 'Slitte');
 
-CREATE TYPE TipoSkipass AS ENUM ('Ciaspole', 'Slitte');
+CREATE TYPE TipoSkipass AS ENUM ('Giornaliero', 'Settimanale');
 
 CREATE TABLE Cliente(
 	Nome VARCHAR (30) NOT NULL,
@@ -69,12 +69,13 @@ CREATE TABLE Cliente(
 
 CREATE TABLE Vendita
 (
-	NomeVen VARCHAR (30) NOT NULL,
-	CognomeVen VARCHAR (30) NOT NULL,
+	NomeVen VARCHAR (30),
+	CognomeVen VARCHAR (30),
 	IDVendita INT PRIMARY KEY NOT NULL,
-	IDOggetto INT NOT NULL UNIQUE,
-	Sconto VARCHAR (20) NOT NULL UNIQUE,
-	PrezzoTotale FLOAT NOT NULL
+	IDOggetto INT UNIQUE,
+	Sconto VARCHAR (20) UNIQUE,
+	Prezzo FLOAT NOT NULL,
+	Quantita INT NOT NULL
 );
 
 CREATE TABLE CartaFedelta
@@ -87,9 +88,9 @@ CREATE TABLE CartaFedelta
 
 CREATE TABLE Sconto 
 (
-	IDCarta VARCHAR (20) NOT NULL,
+	IDCarta VARCHAR (20) PRIMARY KEY NOT NULL,
 	PuntiAcc INT NOT NULL,
-	CodiceSconto VARCHAR(20) PRIMARY KEY NOT NULL,
+	CodiceSconto VARCHAR(20),
 	FOREIGN KEY (CodiceSconto) REFERENCES Vendita(Sconto) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (IDCarta) REFERENCES CartaFedelta(IDCarta)
 );
@@ -109,11 +110,12 @@ CREATE TABLE Lezione
 (
 	TesseraMaestro VARCHAR(25) NOT NULL,
 	CodiceCliente VARCHAR (16) NOT NULL,
+	CodiceLezione VARCHAR (20) PRIMARY KEY NOT NULL,
 	Tipologia Disciplina NOT NULL,
 	TipoCliente Persona NOT NULL,
 	NumOre SMALLINT NOT NULL,
 	DataLez DATE NOT NULL,
-	PRIMARY KEY (TesseraMaestro, CodiceCliente),
+	Prezzo FLOAT NOT NULL,
 	FOREIGN KEY (CodiceCliente) REFERENCES Cliente(CF) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (TesseraMaestro) REFERENCES Maestro(Tessera) ON UPDATE CASCADE ON DELETE CASCADE
 ); 
@@ -122,11 +124,12 @@ CREATE TABLE Noleggio
 (
 	NomeNol VARCHAR (30) NOT NULL,
 	CognomeNol VARCHAR (30) NOT NULL,
-	CartaIdentita VARCHAR (9) PRIMARY KEY NOT NULL,
+	CartaIdentita VARCHAR (9) NOT NULL,
 	DataInizio DATE NOT NULL,
 	DataFine DATE NOT NULL,
-	ID INT NOT NULL,
-	PrezzoTotale FLOAT NOT NULL,
+	ID INT NOT NULL, --Codice oggetto Scelto
+	Prezzo FLOAT NOT NULL,
+	PRIMARY KEY (CartaIdentita, ID),
 	UNIQUE(ID)
 );
 
@@ -245,15 +248,19 @@ CREATE TABLE Scontrino
 	DataVen DATE NOT NULL,
 	PrezzoScontrino FLOAT NOT NULL,
 	Articolo VARCHAR (50) NOT NULL,
-	Quantita INT NOT NULL
+	Quantita INT NOT NULL,
+	FOREIGN KEY (IDScontrino) REFERENCES Vendita (IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Skipass
 (
 	IDSkipass INT PRIMARY KEY NOT NULL,
-	PrezzoBambini FLOAT NOT NULL,
-	PrezzoAdulti FLOAT NOT NULL,
-	Tipologia TipoSkipass NOT NULL
+	PrezzoBambini FLOAT,
+	PrezzoAdulti FLOAT,
+	Tipologia TipoSkipass NOT NULL,
+	DataSkip DATE NOT NULL,
+	Quantita INT NOT NULL,
+	FOREIGN KEY (IDSkipass) REFERENCES Vendita(IDVendita) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE VenSci
@@ -400,7 +407,8 @@ INSERT INTO Maestro(Nome, Cognome, Tessera, Tipologia, LinguaTed, LinguaFra) VAL
 ('Philippe', 'Lau', 'M12', 'Telemark', 'NO', 'SI'),
 ('Michela', 'Moioli', 'M13', 'Snowboard', 'SI', 'NO'),
 ('Omar', 'Visintin', 'M14', 'Snowboard', 'SI', 'NO'),
-('Raffaella', 'Brutto', 'M15', 'Snowboard', 'NO', 'SI');
+('Raffaella', 'Brutto', 'M15', 'Snowboard', 'NO', 'SI'),
+('Davide', 'Magnini', 'M16', 'Alpinismo', 'SI', 'SI');
 
 INSERT INTO CartaFedelta(NomeCarta, CognomeCarta, IDCarta, DataInizio) VALUES
 ('Davide', 'Zambelli', 'CF01', '2016-12-01'),
@@ -1024,6 +1032,159 @@ INSERT INTO NolScarponiSnow (Marca, Modello, Taglia, Prezzo, Quantita, IDScarpSn
 ('Nitro', 'Vagabond', '45', '40', '2', '1523'),
 ('Nitro', 'Vagabond', '46', '40', '2', '1524'),
 ('Nitro', 'Vagabond', '47', '40', '2', '1525'),
-('Nitro', 'Vagabond', '48', '40', '2', '1526');
+('Nitro', 'Vagabond', '48', '40', '2', '1526'); 
+
+INSERT INTO Fattura (PIVA, CF, CodUnivoco, PEC, Nome, Cognome, Via, NumeroCivico, Citta, Provincia, CAP, Stato, NumFattura) VALUES
+('00001', 'PDRCRL70H06F839C', '010', 'carlo.pedersoli@pecattori.it', 'Carlo', 'Pedersoli', 'Nazionale', '80', 'Napoli', 'NA', '001', 'IT', '100'),
+('00002', 'SPGVNI80L48H703M', '020', 'ivana.spagna@pecmicrofono.it', 'Ivana', 'Spagna', 'Madrid', '40', 'Salerno', 'SA', '002', 'IT', '200'),
+('00003', 'CPTGVI44C15H501G', '030', 'giove.capitolino@pecmusei.it', 'Giove', 'Capitolino', 'Tempio', '18', 'Roma', 'RM', '003', 'IT', '300'),
+('00004', 'CRVRNN94L02F205J', '040', 'ermanno.cervino@pecmoda.it', 'Ermanno', 'Cervino', 'Monte', '33', 'Cortina', 'BL', '004', 'IT', '400'),
+('00005', 'ZCCFRU04A21H501N', '050', 'furio.zoccano@pecmagda.it', 'Furio', 'Zoccano', 'Tevere', '52', 'Roma', 'RM', '005', 'IT', '500'),
+('00006', 'PLLFRC88M45L781B', '060', 'federica.pellegrini@pecpodio.it', 'Federica', 'Pellegrini', 'Olimpia', '11', 'Mestre', 'VE', '006', 'IT', '600'),
+('00007', 'PTZSBN65M49A952O', '070', 'sabine.petzl@pecpolitik.de', 'Sabine', 'Petzl', 'Brot', '22', 'Vienna', 'A', '007', 'A', '700'),
+('00008', 'GNSJNN78S54H501X', '080', 'joanna.gaines@pecsilos.us', 'Joanna', 'Gaines', 'Magnolia', '4', 'Waco', 'TX', '008', 'US', '800');
+
+INSERT INTO Sconto (IDCarta, PuntiAcc, CodiceSconto) VALUES
+('CF01', '500', ''),
+('CF02', '500', ''),
+('CF03', '500', ''),
+('CF04', '0', 'SCONTO100'),
+('CF05', '0', 'SCONTO1000'),
+('CF06', '50', ''),
+('CF07', '30', ''),
+('CF08', '200', ''),
+('CF09', '10', 'SCONTO80'),
+('CF10', '80', ''),
+('CF11', '300', ''),
+('CF12', '120', ''),
+('CF13', '210', ''),
+('CF14', '700', ''),
+('CF15', '20', '');
+
+INSERT INTO Lezione (TesseraMaestro, CodiceCliente, Tipologia, TipoCliente, NumOre, DataLez, Prezzo, CodiceLezione) VALUES
+('M04', 'CRVRNN94L02F205J', 'Discesa', 'Adulto', '5', '2018-12-22', '125', 'A'),
+('M05', 'GNSLLE07T53H501J', 'Discesa', 'Bambino', '5', '2019-12-26', '100', 'B'),
+('M05', 'GNSLLE07T53H501J', 'Discesa', 'Bambino', '5', '2019-12-27', '100', 'C'),
+('M05', 'SNTGLI07B48L378C', 'Discesa', 'Bambino', '3', '2019-12-28', '60', 'D'),
+('M05', 'SNTGLI07B48L378C', 'Discesa', 'Bambino', '3', '2019-12-29', '60', 'E'),
+('M02', 'ZMBDVD99A27L378P', 'Discesa', 'Adulto', '8', '2020-01-08', '200', 'F'),
+('M06', 'GNSCHP74S14H501H', 'Snowboard', 'Adulto', '3', '2019-12-26', '75', 'G'),
+('M06', 'GNSCHP74S14H501H', 'Snowboard', 'Adulto', '3', '2019-12-27', '75', 'H'),
+('M06', 'GNSCHP74S14H501H', 'Snowboard', 'Adulto', '3', '2019-12-28', '75', 'I'),
+('M01', 'GNSCHP74S14H501H', 'Discesa', 'Adulto', '4', '2020-01-04', '100', 'L'),
+('M13', 'MYRKRL10P70A952R', 'Snowboard', 'Bambino', '6', '2019-12-20', '120', 'M'),
+('M08', 'LNGFNZ60T28A952H', 'Fondo', 'Adulto', '4', '2018-01-04', '100', 'N'),
+('M08', 'LNGFNZ60T28A952H', 'Fondo', 'Adulto', '2', '2018-01-05', '50', 'O'),
+('M09', 'GRNNCY43E51F839M', 'Fondo', 'Adulto', '4', '2019-01-06', '100', 'P'),
+('M12', 'DGLCRL75C30A326P', 'Telemark', 'Adulto', '2', '2018-01-04', '50', 'Q'),
+('M12', 'DGLCRL75C30A326P', 'Telemark', 'Adulto', '2', '2018-01-05', '50', 'R'),
+('M12', 'DGLCRL75C30A326P', 'Telemark', 'Adulto', '2', '2018-01-06', '50', 'S'),
+('M16', 'MLNFNC78A12A271Q', 'Alpinismo', 'Adulto', '4', '2020-01-10', '100', 'T');
+
+INSERT INTO Scontrino (IDScontrino, DataVen, PrezzoScontrino, Articolo, Quantita) VALUES
+('5000', '2015-02-20', '600', '0502', '3'),
+('5001', '2016-11-10', '500', '0702', '5'),
+('5002', '2018-08-27', '6000', '0903', '2'),
+('5003', '2018-11-30', '140', '1114', '2'),
+('5004', '2019-12-15', '70', '0101', '1'),
+('5005', '2016-11-25', '560', '1312', '2'),
+('5006', '2017-12-02', '1350', '1447', '3'),
+('5007', '2018-02-20', '110', '1005', '2'),
+('5008', '2019-09-14', '900', '0001', '2'),
+('5009', '2019-10-10', '390', '0209', '3'),
+('5010', '2018-06-06', '50', '0605', '10'),
+('5011', '2020-01-03', '300', '1522', '2'),
+('5012', '2019-12-05', '300', '1241', '1'),
+('5013', '2017-11-30', '480', '0407', '3'),
+('5014', '2019-11-18', '640', '0401', '4'),
+('5015', '2018-01-05', '1080', '0105', '6');
+
+--55 adulti, 28 bambino GIO; 300 adulti, 150 bambino SETT prezzi in Euro
+INSERT INTO Skipass (IDSkipass, PrezzoAdulti, PrezzoBambini, DataSkip, Quantita, Tipologia) VALUES
+('6000', '4400', NULL ,'2019-12-21', '80', 'Giornaliero'),
+('6001', NULL , '2800' ,'2019-12-21', '100', 'Giornaliero'),
+('6002', '9000', NULL ,'2019-12-23', '30', 'Settimanale'),
+('6003', NULL, '4500' ,'2019-12-25', '30', 'Settimanale'),
+('6004', '11000', NULL ,'2019-12-25', '200', 'Giornaliero'),
+('6005', NULL , '7000' ,'2019-12-25', '250', 'Giornaliero'),
+('6006', '8250', NULL ,'2019-12-28', '150', 'Giornaliero'),
+('6007', NULL , '5600' ,'2019-12-28', '200', 'Giornaliero'),
+('6008', '22000', NULL ,'2019-12-31', '400', 'Giornaliero'),
+('6009', NULL , '8400' ,'2019-12-31', '300', 'Giornaliero'),
+('6010', '60000' , NULL ,'2019-12-31', '200', 'Settimanale'),
+('6011', NULL , '15000' ,'2019-12-31', '100', 'Settimanale'),
+('6012', '33000', NULL ,'2020-01-01', '600', 'Giornaliero'),
+('6013', NULL, '14000' ,'2020-01-01', '500', 'Giornaliero'),
+('6014', '150000', NULL ,'2020-01-01', '500', 'Settimanale'),
+('6015', NULL, '60000' ,'2020-01-01', '400', 'Settimanale');
+
+INSERT INTO Noleggio (NomeNol, CognomeNol, CartaIdentita, DataInizio, DataFine, ID, Prezzo) VALUES
+('James', 'Bondi', 'CI1000000','2019-11-30','2019-12-06','1212','160'),
+('James', 'Bondi', 'CI1000000','2019-11-30','2019-12-06','1423','80'),
+('James', 'Bondi', 'CI1000000','2019-11-30','2019-12-06','1113','10'),
+('Rosa', 'Salsa', 'CI2000000','2018-11-01','2018-11-07','0905','220'),
+('Toni', 'Gin', 'CI3000000','2019-12-15','2019-12-22','1314','120'),
+('Toni', 'Gin', 'CI3000000','2019-12-15','2019-12-22','1511','40'),
+('Chin', 'Chanpai', 'CI4000000','2020-01-01','2020-01-07','1005','30'),
+('Chin', 'Chanpai', 'CI4000000','2020-01-01','2020-01-07','1012','30'),
+('Otto', 'Pantzer', 'CI5000000','2019-12-25','2019-12-31','1119','10'),
+('Otto', 'Pantzer', 'CI5000000','2019-12-25','2019-12-31','1247','130'),
+('Otto', 'Pantzer', 'CI5000000','2019-12-25','2019-12-31','1460','50'),
+('Nutipu', 'Manescu', 'CI6000000','2018-12-27','2018-12-22','0701','100'),
+('Amalia', 'Delana', 'CI7000000','2017-12-30','2018-01-05','0801','20'),
+('Massimo', 'Dellapena', 'CI8000000','2019-11-15','2019-11-21','1101','15'),
+('Massimo', 'Dellapena', 'CI8000000','2019-11-15','2019-11-21','1203','150'),
+('Massimo', 'Dellapena', 'CI8000000','2019-11-15','2019-11-21','1405','70'),
+('Apollo', 'Ariosto', 'CI9000000','2018-12-02','2018-12-08','1481','50'),
+('Pietro', 'Prezioso', 'CI1100000','2018-12-24','2018-12-30','1106','10'),
+('Pietro', 'Prezioso', 'CI1100000','2018-12-24','2018-12-30','1218','160'),
+('Pietro', 'Prezioso', 'CI1100000','2018-12-24','2018-12-30','1444','80'),
+('Oscar', 'Rafone', 'CI1200000','2019-12-18','2019-12-24','1222','160'),
+('Rick', 'Astley', 'CI1300000','2019-06-12','2019-06-18','0903','120'),
+('Amedeo', 'Minghi', 'CI1400000','2019-11-30','2019-12-06','0702','80');
+
+INSERT INTO Vendita (NomeVen, CognomeVen, IDVendita, IDOggetto, Sconto, Prezzo, Quantita) VALUES
+(NULL, NULL, '6000', NULL, NULL, '4400', '80'),
+(NULL, NULL, '6001', NULL, NULL, '2800', '100'),
+(NULL, NULL, '6002', NULL, NULL, '9000', '30'),
+(NULL, NULL, '6003', NULL, NULL, '4500', '30'),
+(NULL, NULL, '6004', NULL, NULL, '11000', '200'),
+(NULL, NULL, '6005', NULL, NULL, '7000', '250'),
+(NULL, NULL, '6006', NULL, NULL, '8250', '150'),
+(NULL, NULL, '6007', NULL, NULL, '5600', '200'),
+(NULL, NULL, '6008', NULL, NULL, '22000', '400'),
+(NULL, NULL, '6009', NULL, NULL, '8400', '300'),
+(NULL, NULL, '6010', NULL, NULL, '60000', '200'),
+(NULL, NULL, '6011', NULL, NULL, '15000', '100'),
+(NULL, NULL, '6012', NULL, NULL, '33000', '600'),
+(NULL, NULL, '6013', NULL, NULL, '14000', '500'),
+(NULL, NULL, '6014', NULL, NULL, '150000', '500'),
+(NULL, NULL, '6015', NULL, NULL, '60000', '400'),
+(NULL, NULL, '5000', '0502', NULL, '600', '3'),
+(NULL, NULL, '5001', '0702', NULL, '500', '5'),
+(NULL, NULL, '5002', '0903', NULL, '6000', '2'),
+(NULL, NULL, '5003', '1114', NULL, '140', '2'),
+(NULL, NULL, '5004', '0101', NULL, '70', '1'),
+(NULL, NULL, '5005', '1312', NULL, '560', '2'),
+(NULL, NULL, '5006', '1447', NULL, '1350', '3'),
+(NULL, NULL, '5007', '1005', NULL, '110', '2'),
+(NULL, NULL, '5008', '0001', NULL, '900', '2'),
+(NULL, NULL, '5009', '0209', NULL, '390', '3'),
+(NULL, NULL, '5010', '0605', NULL, '50', '10'),
+(NULL, NULL, '5011', '1522', NULL, '300', '2'),
+(NULL, NULL, '5012', '1241', NULL, '300', '1'),
+(NULL, NULL, '5013', '0407', NULL, '480', '3'),
+(NULL, NULL, '5014', '0401', NULL, '640', '4'),
+(NULL, NULL, '5015', '0105', NULL, '1080', '6'),
+('Carlo', 'Pedersoli', '100', '0411', NULL, '100', '1'),
+('Ivana', 'Spagna', '200', '0211', NULL, '60', '1'),
+('Giove', 'Capitolino', '300', '1219', NULL, '750', '1'),
+('Ermanno', 'Cervino', '400', '1489', NULL, '470', '1'),
+('Furio', 'Zoccano', '500', '0603', 'SCONTO80', '200', '1'),
+('Federica', 'Pellegrini', '600', '0302', NULL, '30', '1'),
+('Sabine', 'Petzl', '700', '0904', 'SCONTO1000', '4000', '1'),
+('Joanna', 'Gaines', '800', '0801', 'SCONTO100', '140', '3');
+
+CREATE INDEX idx_tipo_abbigliamento ON Abbigliamento (Tipologia);
 
 SET session_replication_role = 'origin';
