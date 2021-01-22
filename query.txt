@@ -1,32 +1,20 @@
-SELECT cliente.CF
-FROM cliente, noleggio
-WHERE noleggio.nomenol=cliente.nome and noleggio.cognomenol=cliente.cognome and noleggio.datafine<'2021/01/06'
 
-__________________________________
+quanti adulti vs quanti bambini fanno lezioni alla scuola sci
 
-SELECT cliente.nome
-FROM lezione, cliente
-WHERE cliente.CF=lezione.codicecliente and lezione.tipocliente='Bambino'
+drop view if exists adulti;
 
-__________________________________
+create view adulti as
+SELECT distinct count(a.nome)
+FROM cliente a join lezione l on (a.CF=l.codicecliente)
+WHERE l.tipocliente='Adulto';
 
-SELECT COUNT(cliente) as numeropersone
-FROM lezione, cliente
-WHERE cliente.CF=lezione.codicecliente and lezione.numore='8'
-
-__________________________________
-
-SELECT vendita.sconto as sconto, vendita.idvendita as vendita
-FROM vendita, scontrino
-WHERE vendita.idvendita=scontrino.idscontrino and scontrino.dataven='2020-25-12'
-
-__________________________________
-
-SELECT DISTINCT nolsci.modello as sci, nolscarponisci.modello as scarponi, nolbastoncini.modello as bastoncini 
-FROM nolsci, nolscarponisci, nolbastoncini
-WHERE nolsci.altezza='170' and nolscarponisci.taglia='37' and nolbastoncini.altezza='130'
+select adulti as clienti_adulti, count(b.nome) as clienti_bambini
+from lezione l join cliente b on (b.CF=l.codicecliente), adulti
+where l.tipocliente='Bambino'
+group by adulti
 
 ___________________________________
+
 
 DROP VIEW IF EXISTS ordini_abbigliamento;
 
@@ -42,3 +30,50 @@ EXCEPT(
 SELECT abbigliamento.modello, ordini_abbigliamento
 from abbigliamento, ordini_abbigliamento
 where abbigliamento.quantita>'8');
+
+__________________________________
+vedere se hanno venduto più sci+scarponisci o snowboard+scarponisnowboard
+
+drop view if exists sci_vendite;
+
+create view sci_vendite as
+SELECT sum(vendita.prezzo) as prezzo_totale
+FROM vendita
+WHERE idoggetto::text LIKE '14%' or idoggetto::text LIKE '12%';
+
+select sum(v.prezzo), sci_vendite
+from vendita v, sci_vendite
+where idoggetto::text LIKE '12%' or idoggetto::text LIKE '15%'
+group by sci_vendite
+
+
+__________________________________
+colore abbigliamento + venduto (classifica discendente) che è costatopiu di 250 euro
+
+select sum(v.quantita), a.colore as colore_abb_venduti
+from vendita v join abbigliamento a on (v.idoggetto=a.idabb)
+where v.prezzo>'250'
+group by a.colore
+order by sum(v.quantita) desc
+
+_________________________________
+totale venduto senza le vendite degli sci, nell'anno 2018
+
+select sum(v.prezzo) as senza_sconti
+from vendita v join scontrino s on (v.idvendita=s.idscontrino)
+where s.dataven>'2017-12-31' and s.dataven<'2019-01-01'
+except(select v.idoggetto 
+	   from vendita v 
+	   where idoggetto::text='12%');
+
+_________________________________
+soldi spesi da i clienti titolari di carta fedeltà che abbiano conseguito almeno una lezione in ordine decrescente
+
+select distinct cl.nome, sum(v.prezzo)
+from    cliente cl, cartafedelta ca, vendita v 
+where cl.nome=ca.nomecarta and cl.cognome=ca.cognomecarta and cl.nome=v.nomeven and cl.cognome=v.cognomeven  
+	and	exists (select l.codicecliente
+			 from lezione l join cliente cl on (l.codicecliente=cl.cf))
+group by cl.nome
+order by sum(v.prezzo) desc;
+	
