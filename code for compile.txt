@@ -1,0 +1,1 @@
+g++ Project.cpp -L Dependencies\lib -lpq -o codice -std=c++11
