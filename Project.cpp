@@ -151,7 +151,7 @@ int main(){
 
 	//SECONDA QUERY
 	cout << "                       Seconda Query: \n";
-	res = PQexec(conn, "DROP VIEW IF EXISTS ordini_abbigliamento; create view ordini_abbigliamento as SELECT abbigliamento.taglia FROM abbigliamento WHERE abbigliamento.quantita<'7' group by abbigliamento.taglia; SELECT abbigliamento.modello, ordini_abbigliamento as taglie FROM ordini_abbigliamento, abbigliamento EXCEPT(SELECT abbigliamento.modello, ordini_abbigliamento from abbigliamento, ordini_abbigliamento where abbigliamento.quantita>'8');");
+	res = PQexec(conn, "DROP VIEW IF EXISTS ordini_abbigliamento; create view ordini_abbigliamento as SELECT abbigliamento.quantita as quantita_in_stock, abbigliamento.modello as modello_in_stock, abbigliamento.idabb as id_in_stock FROM abbigliamento WHERE abbigliamento.quantita<'6' group by abbigliamento.taglia, abbigliamento.modello, abbigliamento.idabb order by abbigliamento.modello; select * from vendita v join ordini_abbigliamento oa on(v.idoggetto=oa.id_in_stock) where v.sconto!='0';");
 	stampa(res);
 	cout << endl;
 	

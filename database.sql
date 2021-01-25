@@ -1209,22 +1209,21 @@ where l.tipocliente='Bambino'
 group by adulti
 
 /*Seconda Query:
-
+Mostra tutte le vendite di abbigliamento che hanno uno sconto applicato e specifica modello, id e quantità rimasta in stock
 */
+
 DROP VIEW IF EXISTS ordini_abbigliamento;
 
 create view ordini_abbigliamento as
-SELECT abbigliamento.taglia
+SELECT abbigliamento.quantita as quantita_in_stock, abbigliamento.modello as modello_in_stock, abbigliamento.idabb as id_in_stock
 FROM abbigliamento
-WHERE abbigliamento.quantita<'7'
-group by abbigliamento.taglia;
+WHERE abbigliamento.quantita<'6'
+group by abbigliamento.taglia, abbigliamento.modello, abbigliamento.idabb
+order by abbigliamento.modello;
 
-SELECT abbigliamento.modello, ordini_abbigliamento as taglie
-FROM ordini_abbigliamento, abbigliamento
-EXCEPT( 
-SELECT abbigliamento.modello, ordini_abbigliamento
-from abbigliamento, ordini_abbigliamento
-where abbigliamento.quantita>'8');
+select *
+from vendita v join ordini_abbigliamento oa on(v.idoggetto=oa.id_in_stock)
+where v.sconto!='0';
 
 /*Terza Query: 
 Creazione di una view riguardante il totale delle vendite degli sci, confrontata con il totale delle vendite degli snowboard.
