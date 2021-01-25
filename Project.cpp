@@ -157,7 +157,7 @@ int main(){
 	
 	//TERZA QUERY
 	cout << "       Terza Query: \n";
-	res = PQexec(conn, "drop view if exists sci_vendite; create view sci_vendite as SELECT sum(vendita.prezzo) as prezzo_totale FROM vendita WHERE idoggetto::text LIKE '14%' or idoggetto::text LIKE '12%'; select sum(v.prezzo), sci_vendite from vendita v, sci_vendite where idoggetto::text LIKE '12%' or idoggetto::text LIKE '15%' group by sci_vendite");
+	res = PQexec(conn, "drop view if exists sci_vendite; create view sci_vendite as SELECT sum(vendita.prezzo) as prezzo_totale FROM vendita WHERE idoggetto::text LIKE '14%' or idoggetto::text LIKE '12%'; select sum(v.prezzo) AS snowboard_vendite, sci_vendite from vendita v, sci_vendite where idoggetto::text LIKE '12%' or idoggetto::text LIKE '15%' group by sci_vendite");
 	stampa(res);
 	cout << endl;
 
@@ -176,6 +176,12 @@ int main(){
 	//SESTA QUERY
 	cout << "    Sesta Query \n";
 	res = PQexec(conn, "select distinct cl.nome, sum(v.prezzo) from cliente cl, cartafedelta ca, vendita v where cl.nome=ca.nomecarta and cl.cognome=ca.cognomecarta and cl.nome=v.nomeven and cl.cognome=v.cognomeven and	exists (select l.codicecliente from lezione l join cliente cl on (l.codicecliente=cl.cf)) group by cl.nome order by sum(v.prezzo) desc;");
+	stampa(res);
+	cout << endl;
+
+	//SESTA QUERY BIS
+	cout << "    Sesta Query Bis \n";
+	res = PQexec(conn, "SELECT DISTINCT cl.nome, cl.cognome, lez.tipologia FROM cliente cl, lezione lez, fattura fatt, vendita ven WHERE fatt.NumFattura = ven.IDvendita AND cl.CF = lez.codicecliente AND fatt.CF = cl.CF");
 	stampa(res);
 	cout << endl;
 

@@ -1,5 +1,5 @@
 
-quanti adulti vs quanti bambini fanno lezioni alla scuola sci
+quanti adulti e quanti bambini fanno lezioni alla scuola sci
 
 drop view if exists adulti;
 
@@ -41,7 +41,7 @@ SELECT sum(vendita.prezzo) as prezzo_totale
 FROM vendita
 WHERE idoggetto::text LIKE '14%' or idoggetto::text LIKE '12%';
 
-select sum(v.prezzo), sci_vendite
+select sum(v.prezzo) AS snowboard_vendite, sci_vendite
 from vendita v, sci_vendite
 where idoggetto::text LIKE '12%' or idoggetto::text LIKE '15%'
 group by sci_vendite
@@ -76,4 +76,16 @@ where cl.nome=ca.nomecarta and cl.cognome=ca.cognomecarta and cl.nome=v.nomeven 
 			 from lezione l join cliente cl on (l.codicecliente=cl.cf))
 group by cl.nome
 order by sum(v.prezzo) desc;
+
+------------------------------------
+
+seleziona i clienti che hanno effettuato una fattura ed abbiano effettuato una lezione
+
+SELECT DISTINCT cl.nome, cl.cognome, lez.tipologia 
+FROM cliente cl, lezione lez, fattura fatt, vendita ven
+WHERE fatt.NumFattura = ven.IDvendita AND cl.CF = lez.codicecliente AND fatt.CF = cl.CF
+
+------------------------------------
+
+seleziona tutte le persone che abbiano noleggiato sci+scarponi+bastoncini dall' anno 2019 in poi e mostra il modello di ciò che è stato noleggiato
 	

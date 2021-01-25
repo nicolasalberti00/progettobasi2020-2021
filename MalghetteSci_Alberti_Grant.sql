@@ -2154,3 +2154,95 @@ ALTER TABLE ONLY public.vensnow
 -- PostgreSQL database dump complete
 --
 
+/*Creazione Indice sulla tabella "Abbigliamento", attributo "Tipologia":
+*/
+CREATE INDEX idx_tipo_abbigliamento ON Abbigliamento (Tipologia);
+
+/*QUERY:
+
+Prima Query: 
+Creazione View che mostra quanti adulti e quanti bambini hanno effettuato delle lezioni.
+*/
+drop view if exists adulti;
+
+create view adulti as
+SELECT distinct count(a.nome)
+FROM cliente a join lezione l on (a.CF=l.codicecliente)
+WHERE l.tipocliente='Adulto';
+
+select adulti as clienti_adulti, count(b.nome) as clienti_bambini
+from lezione l join cliente b on (b.CF=l.codicecliente), adulti
+where l.tipocliente='Bambino'
+group by adulti
+
+/*Seconda Query:
+
+*/
+DROP VIEW IF EXISTS ordini_abbigliamento;
+
+create view ordini_abbigliamento as
+SELECT abbigliamento.taglia
+FROM abbigliamento
+WHERE abbigliamento.quantita<'7'
+group by abbigliamento.taglia;
+
+SELECT abbigliamento.modello, ordini_abbigliamento as taglie
+FROM ordini_abbigliamento, abbigliamento
+EXCEPT( 
+SELECT abbigliamento.modello, ordini_abbigliamento
+from abbigliamento, ordini_abbigliamento
+where abbigliamento.quantita>'8');
+
+/*Terza Query: 
+Creazione di una view riguardante il totale delle vendite degli sci, confrontata con il totale delle vendite degli snowboard.
+*/
+
+drop view if exists sci_vendite;
+
+create view sci_vendite as
+SELECT sum(vendita.prezzo) as prezzo_totale
+FROM vendita
+WHERE idoggetto::text LIKE '14%' or idoggetto::text LIKE '12%';
+
+select sum(v.prezzo) AS snowboard_vendite, sci_vendite
+from vendita v, sci_vendite
+where idoggetto::text LIKE '12%' or idoggetto::text LIKE '15%'
+group by sci_vendite
+
+/*Quarta query:
+Mostra il colore del prodotto di abbigliamento più venduto e che è costato più di 250 euro, in ordine decrescente.
+*/
+
+select sum(v.quantita), a.colore as colore_abb_venduti
+from vendita v join abbigliamento a on (v.idoggetto=a.idabb)
+where v.prezzo>'250'
+group by a.colore
+order by sum(v.quantita) desc
+
+/*Quinta Query:
+Mostra il totale delle vendite senza le vendite degli sci, effettuate nell'anno 2018
+*/
+select sum(v.prezzo) as senza_sconti
+from vendita v join scontrino s on (v.idvendita=s.idscontrino)
+where s.dataven>'2017-12-31' and s.dataven<'2019-01-01'
+except(select v.idoggetto 
+	   from vendita v 
+	   where idoggetto::text='12%');
+
+/*Sesta Query:
+Mostra i soldi spesi da i clienti titolari di carta fedeltà che abbiano conseguito almeno una lezione, in ordine decrescente
+*/
+select distinct cl.nome, sum(v.prezzo)
+from    cliente cl, cartafedelta ca, vendita v 
+where cl.nome=ca.nomecarta and cl.cognome=ca.cognomecarta and cl.nome=v.nomeven and cl.cognome=v.cognomeven  
+	and	exists (select l.codicecliente
+			 from lezione l join cliente cl on (l.codicecliente=cl.cf))
+group by cl.nome
+order by sum(v.prezzo) desc;
+
+/*Sesta Query Bis:
+Mostra tutti i clienti che hanno effettuato una fattura ed abbiano effettuato almeno una lezione
+*/
+SELECT DISTINCT cl.nome, cl.cognome, lez.tipologia 
+FROM cliente cl, lezione lez, fattura fatt, vendita ven
+WHERE fatt.NumFattura = ven.IDvendita AND cl.CF = lez.codicecliente AND fatt.CF = cl.CF
