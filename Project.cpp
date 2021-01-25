@@ -8,8 +8,8 @@ using namespace std;
 
 # define PG_HOST "127.0.0.1"
 # define PG_USER "postgres" // il vostro nome utente
-# define PG_DB "ScuolaSci2" // il nome del database
-# define PG_PASS "inter" // la vostra password
+# define PG_DB "db" // il nome del database
+# define PG_PASS "password" // la vostra password
 # define PG_PORT 5432
 
 void checkResults(PGresult* res, const PGconn* conn) {
